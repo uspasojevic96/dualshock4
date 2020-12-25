@@ -9,56 +9,150 @@ import {OrientationState} from "./orientation-state";
 import {TouchPadState} from "./touch-pad-state";
 
 export class DualShock {
-    private options: DualShockOptions;
-    private logger: Logger = new Logger();
-    private hid: HID | null = null;
+    /**
+     * Options for DualShock
+     *
+     * @internal
+     */
+    private _options: DualShockOptions;
 
+    /**
+     * Logger reference
+     *
+     * @internal
+     */
+    private _logger: Logger = new Logger();
+
+    /**
+     * Node HID reference
+     *
+     * @internal
+     */
+    private _hid: HID | null = null;
+
+    /**
+     * DualShock state
+     */
     public readonly state: BehaviorSubject<Partial<DualShockState>> = new BehaviorSubject<Partial<DualShockState>>({});
 
-    constructor(options: DualShockOptions) {
+    constructor(options?: DualShockOptions) {
+        if (!options) {
+            options = {};
+        }
+
         options.vendorID = options.vendorID || 0x054c;
         options.productID = options.productID || 0x09cc;
         options.tag = options.tag || 'DualShock';
 
-        this.options = options;
+        this._options = options;
     }
 
+    /**
+     * Finds device based on vendor ID and product ID
+     *
+     * @param device - Reference of device that is currently being checked
+     * @returns Returns true if vendor ID and product ID are matched
+     * @internal
+     */
     private _findDevice(device: Device): boolean {
-        return device.vendorId === this.options.vendorID! && device.productId === this.options.productID;
+        return device.vendorId === this._options.vendorID! && device.productId === this._options.productID;
     }
 
-    private static _getDPadUpState(dpad: number): boolean {
-        return dpad === 0 || dpad === 1 || dpad === 7;
+    /**
+     * Checks if DPad Up is pressed
+     *
+     * @param state - Reference of state
+     * @returns Retruns true if pressed
+     * @internal
+     */
+    private static _getDPadUpState(state: number): boolean {
+        return state === 0 || state === 1 || state === 7;
     }
 
-    private static _getDPadDownState(dpad: number): boolean {
-        return dpad === 3 || dpad === 4 || dpad === 5;
+    /**
+     * Checks if DPad Down is pressed
+     *
+     * @param state - Reference of state
+     * @returns Retruns true if pressed
+     * @internal
+     */
+    private static _getDPadDownState(state: number): boolean {
+        return state === 3 || state === 4 || state === 5;
     }
 
-    private static _getDPadLeftState(dpad: number): boolean {
-        return dpad === 5 || dpad === 6 || dpad === 7;
+    /**
+     * Checks if DPad Left is pressed
+     *
+     * @param state - Reference of state
+     * @returns Retruns true if pressed
+     * @internal
+     */
+    private static _getDPadLeftState(state: number): boolean {
+        return state === 5 || state === 6 || state === 7;
     }
 
-    private static _getDPadRightState(dpad: number): boolean {
-        return dpad === 1 || dpad === 2 || dpad === 3;
+    /**
+     * Checks if DPad Right is pressed
+     *
+     * @param state - Reference of state
+     * @returns Retruns true if pressed
+     * @internal
+     */
+    private static _getDPadRightState(state: number): boolean {
+        return state === 1 || state === 2 || state === 3;
     }
 
+    /**
+     * Checks if Cross is pressed
+     *
+     * @param state - Reference of state
+     * @returns Retruns true if pressed
+     * @internal
+     */
     private static _getCrossState(state: number): boolean {
         return (state & 32) !== 0;
     }
 
+    /**
+     * Checks if Circle is pressed
+     *
+     * @param state - Reference of state
+     * @returns Retruns true if pressed
+     * @internal
+     */
     private static _getCircleState(state: number): boolean {
         return (state & 64) !== 0;
     }
 
+    /**
+     * Checks if Square is pressed
+     *
+     * @param state - Reference of state
+     * @returns Retruns true if pressed
+     * @internal
+     */
     private static _getSquareState(state: number): boolean {
         return (state & 16) !== 0;
     }
 
+    /**
+     * Returns Triangle button state
+     *
+     * @param state - Reference of state
+     * @returns Retruns true if pressed, otherwise false
+     * @internal
+     */
     private static _getTriangleState(state: number): boolean {
         return (state & 128) !== 0;
     }
 
+    /**
+     * Returns Left stick movement state
+     *
+     * @param state - Reference of state
+     * @returns Returns Left stick coordinates
+     * @internal
+     */
     private static _getLeftStickState(state: Buffer): Coordinates {
         return {
             x: state[1],
@@ -67,6 +161,13 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns Right stick movement state
+     *
+     * @param state - Reference of state
+     * @returns Returns Right stick coordinates
+     * @internal
+     */
     private static _getRightStickState(state: Buffer): Coordinates {
         return {
             x: state[3],
@@ -195,32 +296,36 @@ export class DualShock {
     }
 
     private _handleHIDError(error: any): void {
-        this.hid!.close();
-        this.logger.log(
+        this._hid!.close();
+        this._logger.log(
             LogLevel.ERROR,
-            this.options.tag!,
-            `Lost connection to ${this.options.vendorID}:${this.options.productID}`
+            this._options.tag!,
+            `Lost connection to ${this._options.vendorID}:${this._options.productID}`
         );
     }
 
+    /**
+     * Connects to the DualShock controller
+     * Subscribe to `state` first
+     */
     public connect(): void {
-        this.logger.log(
+        this._logger.log(
             LogLevel.INFO,
-            this.options.tag!,
-            `Connecting to ${this.options.vendorID}:${this.options.productID}`
+            this._options.tag!,
+            `Connecting to ${this._options.vendorID}:${this._options.productID}`
         );
 
         const device = devices().find(this._findDevice.bind(this));
 
         if (device) {
-            this.hid = new HID(this.options.vendorID!, this.options.productID!);
-            this.hid!.on('data', this._parseHIDData.bind(this));
-            this.hid!.on('error', this._handleHIDError.bind(this));
+            this._hid = new HID(this._options.vendorID!, this._options.productID!);
+            this._hid!.on('data', this._parseHIDData.bind(this));
+            this._hid!.on('error', this._handleHIDError.bind(this));
         } else {
-            this.logger.log(
+            this._logger.log(
                 LogLevel.ERROR,
-                this.options.tag!,
-                `Failed to connect to ${this.options.vendorID!}:${this.options.productID!}`
+                this._options.tag!,
+                `Failed to connect to ${this._options.vendorID!}:${this._options.productID!}`
             );
         }
     }
