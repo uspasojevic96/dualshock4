@@ -1,6 +1,5 @@
 export * from './analog-state';
 export * from './coordinates';
-export * from './dualshock-button';
 export * from './dualshock-options';
 export * from './dualshock-state';
 export * from './dualshock';
