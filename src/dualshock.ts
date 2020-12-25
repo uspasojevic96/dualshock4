@@ -402,30 +402,30 @@ export class DualShock {
      */
     private _parseHIDData(data: Buffer): void {
         let state: DualShockState = {
-            leftStick: DualShock._getLeftStickState(data),
-            rightStick: DualShock._getRightStickState(data),
-            dPadUp: DualShock._getDPadUpState(data[5] & 15),
+            battery: data[12],
+            circle: DualShock._getCircleState(data[5]),
+            cross: DualShock._getCrossState(data[5]),
             dPadDown: DualShock._getDPadDownState(data[5] & 15),
             dPadLeft: DualShock._getDPadLeftState(data[5] & 15),
             dPadRight: DualShock._getDPadRightState(data[5] & 15),
-            cross: DualShock._getCrossState(data[5]),
-            circle: DualShock._getCircleState(data[5]),
-            square: DualShock._getSquareState(data[5]),
-            triangle: DualShock._getTriangleState(data[5]),
-            r3: DualShock._getR3State(data[6]),
-            l3: DualShock._getL3State(data[6]),
-            options: DualShock._getOptionsState(data[6]),
-            share: DualShock._getShareState(data[6]),
+            dPadUp: DualShock._getDPadUpState(data[5] & 15),
             l1: DualShock._getL1State(data[6]),
-            r1: DualShock._getR1State(data[6]),
             l2: DualShock._getL2State(data),
-            r2: DualShock._getR2State(data),
+            l3: DualShock._getL3State(data[6]),
+            leftStick: DualShock._getLeftStickState(data),
             motion: DualShock._getMotionState(data),
+            options: DualShock._getOptionsState(data[6]),
             orientation: DualShock._getOrientationState(data),
+            ps: DualShock._getPsState(data[7]),
+            r1: DualShock._getR1State(data[6]),
+            r2: DualShock._getR2State(data),
+            r3: DualShock._getR3State(data[6]),
+            rightStick: DualShock._getRightStickState(data),
+            share: DualShock._getShareState(data[6]),
+            square: DualShock._getSquareState(data[5]),
             timestamp: DualShock._getTimestampState(data[7]),
-            battery: data[12],
             touchPad: DualShock._getTrackPadState(data),
-            ps: DualShock._getPsState(data[7])
+            triangle: DualShock._getTriangleState(data[5])
         };
 
         this.state.next(state);
@@ -434,11 +434,10 @@ export class DualShock {
     /**
      * Handles HID error by disconnecting from controller (if applicable) and logging the error
      *
-     * @param error - HID error (currently unused)
      * @internal
      * @private
      */
-    private _handleHIDError(error: any): void {
+    private _handleHIDError(): void {
         this._hid!.close();
         this._logger.log(
             LogLevel.ERROR,
