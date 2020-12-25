@@ -9,7 +9,7 @@ script:
   - npm run build:docs
 deploy:
   provider: pages
-  cleanup: false
+  skip_cleanup: true
   strategy: git
   token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
   local_dir: docs
