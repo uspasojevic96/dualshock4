@@ -17,3 +17,5 @@ deploy:
 before_deploy:
   - touch .nojekyll
   - sed -i '/docs/d' .gitignore
+  - git add .nojekyll
+  - git add docs
