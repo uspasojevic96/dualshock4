@@ -13,6 +13,7 @@ export class DualShock {
      * Options for DualShock
      *
      * @internal
+     * @private
      */
     private _options: DualShockOptions;
 
@@ -20,6 +21,7 @@ export class DualShock {
      * Logger reference
      *
      * @internal
+     * @private
      */
     private _logger: Logger = new Logger();
 
@@ -27,6 +29,7 @@ export class DualShock {
      * Node HID reference
      *
      * @internal
+     * @private
      */
     private _hid: HID | null = null;
 
@@ -53,94 +56,103 @@ export class DualShock {
      * @param device - Reference of device that is currently being checked
      * @returns Returns true if vendor ID and product ID are matched
      * @internal
+     * @private
      */
     private _findDevice(device: Device): boolean {
         return device.vendorId === this._options.vendorID! && device.productId === this._options.productID;
     }
 
     /**
-     * Checks if DPad Up is pressed
+     * Returns DPad Up state
      *
      * @param state - Reference of state
-     * @returns Retruns true if pressed
+     * @returns Returns true if pressed, otherwise false
      * @internal
+     * @private
      */
     private static _getDPadUpState(state: number): boolean {
         return state === 0 || state === 1 || state === 7;
     }
 
     /**
-     * Checks if DPad Down is pressed
+     * Returns DPad Down state
      *
      * @param state - Reference of state
-     * @returns Retruns true if pressed
+     * @returns Returns true if pressed, otherwise false
      * @internal
+     * @private
      */
     private static _getDPadDownState(state: number): boolean {
         return state === 3 || state === 4 || state === 5;
     }
 
     /**
-     * Checks if DPad Left is pressed
+     * Returns DPad Left state
      *
      * @param state - Reference of state
-     * @returns Retruns true if pressed
+     * @returns Returns true if pressed, otherwise false
      * @internal
+     * @private
      */
     private static _getDPadLeftState(state: number): boolean {
         return state === 5 || state === 6 || state === 7;
     }
 
     /**
-     * Checks if DPad Right is pressed
+     * Returns DPad Right state
      *
      * @param state - Reference of state
-     * @returns Retruns true if pressed
+     * @returns Returns true if pressed, otherwise false
      * @internal
+     * @private
      */
     private static _getDPadRightState(state: number): boolean {
         return state === 1 || state === 2 || state === 3;
     }
 
     /**
-     * Checks if Cross is pressed
+     * Returns Cross state
      *
      * @param state - Reference of state
-     * @returns Retruns true if pressed
+     * @returns Returns true if pressed, otherwise false
      * @internal
+     * @private
      */
     private static _getCrossState(state: number): boolean {
         return (state & 32) !== 0;
     }
 
     /**
-     * Checks if Circle is pressed
+     * Returns Circle state
      *
      * @param state - Reference of state
-     * @returns Retruns true if pressed
+     * @returns Returns true if pressed, otherwise false
      * @internal
+     * @private
      */
     private static _getCircleState(state: number): boolean {
         return (state & 64) !== 0;
     }
 
     /**
-     * Checks if Square is pressed
+     * Returns Square state
      *
      * @param state - Reference of state
-     * @returns Retruns true if pressed
+     * @returns Returns true if pressed, otherwise false
      * @internal
+     * @private
      */
     private static _getSquareState(state: number): boolean {
         return (state & 16) !== 0;
     }
 
     /**
-     * Returns Triangle button state
+     * Returns Triangle state
      *
      * @param state - Reference of state
-     * @returns Retruns true if pressed, otherwise false
+     * @returns Returns true if pressed, otherwise false
      * @internal
+     * @private
      */
     private static _getTriangleState(state: number): boolean {
         return (state & 128) !== 0;
@@ -150,8 +162,9 @@ export class DualShock {
      * Returns Left stick movement state
      *
      * @param state - Reference of state
-     * @returns Returns Left stick coordinates
+     * @returns Returns Left stick {@link Coordinates | coordinates}
      * @internal
+     * @private
      */
     private static _getLeftStickState(state: Buffer): Coordinates {
         return {
@@ -165,8 +178,9 @@ export class DualShock {
      * Returns Right stick movement state
      *
      * @param state - Reference of state
-     * @returns Returns Right stick coordinates
+     * @returns Returns Right stick {@link Coordinates | coordinates}
      * @internal
+     * @private
      */
     private static _getRightStickState(state: Buffer): Coordinates {
         return {
@@ -176,30 +190,86 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns R3 state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getR3State(state: number): boolean {
         return (state & 128) !== 0;
     }
 
+    /**
+     * Returns L3 state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getL3State(state: number): boolean {
         return (state & 64) !== 0;
     }
 
+    /**
+     * Returns Options state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getOptionsState(state: number): boolean {
         return (state & 32) !== 0;
     }
 
+    /**
+     * Returns Share state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getShareState(state: number): boolean {
         return (state & 16) !== 0;
     }
 
+    /**
+     * Returns L1 state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getL1State(state: number): boolean {
         return (state & 1) !== 0;
     }
 
+    /**
+     * Returns R1 state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getR1State(state: number): boolean {
         return (state & 2) !== 0;
     }
 
+    /**
+     * Returns R2 state
+     *
+     * @param state - Reference of state
+     * @returns Returns state of {@link AnalogState | R2 analog}
+     * @internal
+     * @private
+     */
     private static _getR2State(state: Buffer): AnalogState {
         return {
             pressed: (state[6] & 8) !== 0,
@@ -207,6 +277,14 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns L2 state
+     *
+     * @param state - Reference of state
+     * @returns Returns state of {@link AnalogState | L2 analog}
+     * @internal
+     * @private
+     */
     private static _getL2State(state: Buffer): AnalogState {
         return {
             pressed: (state[6] & 4) !== 0,
@@ -214,6 +292,14 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns Motion sensor state
+     *
+     * @param state - Reference of state
+     * @returns Returns {@link Coordinates | coordinates} of motion sensor
+     * @internal
+     * @private
+     */
     private static _getMotionState(state: Buffer): Coordinates {
         return {
             x: state.readInt16LE(13),
@@ -222,6 +308,14 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns Gyroscope sensor state
+     *
+     * @param state - Reference of state
+     * @returns Returns {@link OrientationState | orientation} of gyroscope sensor
+     * @internal
+     * @private
+     */
     private static _getOrientationState(state: Buffer): OrientationState {
         return {
             roll: -state.readInt16LE(19),
@@ -230,10 +324,26 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns internal controller timestamp
+     *
+     * @param state - Reference of state
+     * @returns Returns a number representing internal controller timestamp
+     * @internal
+     * @private
+     */
     private static _getTimestampState(state: number): number {
         return state >> 2;
     }
 
+    /**
+     * Returns TouchPad state
+     *
+     * @param state - Reference of state
+     * @returns Returns {@link TouchPadState | touchpad} state
+     * @internal
+     * @private
+     */
     private static _getTrackPadState(state: Buffer): TouchPadState {
         return {
             pressed: (state[7] & 2) !== 0,
@@ -260,10 +370,25 @@ export class DualShock {
         }
     }
 
+    /**
+     * Returns PS state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getPsState(state: number): boolean {
         return (state & 1) !== 0;
     }
 
+    /**
+     * Parses HID data regarding connected controller and updates the controller {@link DualShockState | state}
+     *
+     * @param data - HID data
+     * @internal
+     * @private
+     */
     private _parseHIDData(data: Buffer): void {
         let state: DualShockState = {
             leftStick: DualShock._getLeftStickState(data),
@@ -295,6 +420,13 @@ export class DualShock {
         this.state.next(state);
     }
 
+    /**
+     * Handles HID error by disconnecting from controller (if applicable) and logging the error
+     *
+     * @param error - HID error (currently unused)
+     * @internal
+     * @private
+     */
     private _handleHIDError(error: any): void {
         this._hid!.close();
         this._logger.log(
@@ -306,7 +438,7 @@ export class DualShock {
 
     /**
      * Connects to the DualShock controller
-     * Subscribe to `state` first
+     * Subscribe to {@link DualShock.state | state} first
      */
     public connect(): void {
         this._logger.log(
