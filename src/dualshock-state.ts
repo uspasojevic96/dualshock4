@@ -1,31 +1,31 @@
-import {Coordinates} from "./coordinates";
 import {AnalogState} from "./analog-state";
-import {TouchPadState} from "./touch-pad-state";
+import {Coordinates} from "./coordinates";
 import {OrientationState} from "./orientation-state";
+import {TouchPadState} from "./touch-pad-state";
 
 export interface DualShockState {
-    leftStick: Coordinates;
-    rightStick: Coordinates;
-    cross: boolean;
+    battery: number;
     circle: boolean;
-    triangle: boolean;
-    square: boolean;
+    cross: boolean;
+    dPadDown: boolean;
     dPadLeft: boolean;
     dPadRight: boolean;
     dPadUp: boolean;
-    dPadDown: boolean;
     l1: boolean;
     l2: AnalogState;
     l3: boolean;
+    leftStick: Coordinates;
+    motion: Coordinates;
+    options: boolean;
+    orientation: OrientationState;
+    ps: boolean;
     r1: boolean;
     r2: AnalogState;
     r3: boolean;
+    rightStick: Coordinates;
     share: boolean;
-    options: boolean;
-    touchPad: TouchPadState;
-    motion: Coordinates;
-    orientation: OrientationState;
-    battery: number;
+    square: boolean;
     timestamp: number;
-    ps: boolean;
+    touchPad: TouchPadState;
+    triangle: boolean;
 }

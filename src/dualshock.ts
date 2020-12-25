@@ -1,10 +1,16 @@
-import {DualShockOptions} from "./dualshock-options";
-import {Logger, LogLevel} from '@uspasojevic/logger';
-import {Device, devices, HID} from "node-hid";
-import {BehaviorSubject} from "rxjs";
-import {DualShockState} from "./dualshock-state";
-import {Coordinates} from "./coordinates";
+/**
+ * Provides representation of DualShock4 controller by establishing connection to it through USB HID,
+ * parsing the data from it and emitting the changes to the observers
+ *
+ * @author Uros Spasojevic
+ */
 import {AnalogState} from "./analog-state";
+import {BehaviorSubject} from "rxjs";
+import {Coordinates} from "./coordinates";
+import {Device, devices, HID} from "node-hid";
+import {DualShockOptions} from "./dualshock-options";
+import {DualShockState} from "./dualshock-state";
+import {Logger, LogLevel} from '@uspasojevic/logger';
 import {OrientationState} from "./orientation-state";
 import {TouchPadState} from "./touch-pad-state";
 
@@ -38,6 +44,11 @@ export class DualShock {
      */
     public readonly state: BehaviorSubject<Partial<DualShockState>> = new BehaviorSubject<Partial<DualShockState>>({});
 
+    /**
+     * Constructs DualShock object
+     *
+     * @param options - Configuration options
+     */
     constructor(options?: DualShockOptions) {
         if (!options) {
             options = {};
