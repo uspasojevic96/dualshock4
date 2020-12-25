@@ -1,5 +1,21 @@
+/**
+ * Represents gyroscope sensor
+ *
+ * @author Uros Spasojevic
+ */
 export interface OrientationState {
-    roll: number;
-    yaw: number;
+    /**
+     * Gyroscope pitch
+     */
     pitch: number;
+
+    /**
+     * Gyroscope roll
+     */
+    roll: number;
+
+    /**
+     * Gyroscope yaw
+     */
+    yaw: number;
 }

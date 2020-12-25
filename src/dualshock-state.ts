@@ -1,31 +1,130 @@
-import {Coordinates} from "./coordinates";
+/**
+ * Represents actual state of DualShock4 controller
+ *
+ * @author Uros Spasojevic
+ */
 import {AnalogState} from "./analog-state";
-import {TouchPadState} from "./touch-pad-state";
+import {Coordinates} from "./coordinates";
 import {OrientationState} from "./orientation-state";
+import {TouchPadState} from "./touch-pad-state";
 
 export interface DualShockState {
-    leftStick: Coordinates;
-    rightStick: Coordinates;
-    cross: boolean;
-    circle: boolean;
-    triangle: boolean;
-    square: boolean;
-    dPadLeft: boolean;
-    dPadRight: boolean;
-    dPadUp: boolean;
-    dPadDown: boolean;
-    l1: boolean;
-    l2: AnalogState;
-    l3: boolean;
-    r1: boolean;
-    r2: AnalogState;
-    r3: boolean;
-    share: boolean;
-    options: boolean;
-    touchPad: TouchPadState;
-    motion: Coordinates;
-    orientation: OrientationState;
+    /**
+     * Battery level
+     */
     battery: number;
-    timestamp: number;
+
+    /**
+     * Circle button
+     */
+    circle: boolean;
+    /**
+     * Cross button
+     */
+    cross: boolean;
+
+    /**
+     * DPad Down button
+     */
+    dPadDown: boolean;
+
+    /**
+     * DPad Left button
+     */
+    dPadLeft: boolean;
+
+    /**
+     * DPad Right button
+     */
+    dPadRight: boolean;
+
+    /**
+     * DPad Up button
+     */
+    dPadUp: boolean;
+
+    /**
+     * L1 button
+     */
+    l1: boolean;
+
+    /**
+     * L2 analog button
+     */
+    l2: AnalogState;
+
+    /**
+     * L3 button
+     */
+    l3: boolean;
+
+    /**
+     * Left stick
+     */
+    leftStick: Coordinates;
+
+    /**
+     * Motion sensor
+     */
+    motion: Coordinates;
+
+    /**
+     * Options button
+     */
+    options: boolean;
+
+    /**
+     * Gyroscope sensor
+     */
+    orientation: OrientationState;
+
+    /**
+     * PS button
+     */
     ps: boolean;
+
+    /**
+     * R1 button
+     */
+    r1: boolean;
+
+    /**
+     * R2 analog button
+     */
+    r2: AnalogState;
+
+    /**
+     * R3 button
+     */
+    r3: boolean;
+
+    /**
+     * Right stick
+     */
+    rightStick: Coordinates;
+
+    /**
+     * Share button
+     */
+    share: boolean;
+
+    /**
+     * Square button
+     */
+    square: boolean;
+
+    /**
+     * Internal timestamp
+     */
+    timestamp: number;
+
+    /**
+     * TouchPad
+     */
+    touchPad: TouchPadState;
+
+    /**
+     * Triangle button
+     */
+    triangle: boolean;
 }

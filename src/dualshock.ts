@@ -1,64 +1,182 @@
-import {DualShockOptions} from "./dualshock-options";
-import {Logger, LogLevel} from '@uspasojevic/logger';
-import {Device, devices, HID} from "node-hid";
-import {BehaviorSubject} from "rxjs";
-import {DualShockState} from "./dualshock-state";
-import {Coordinates} from "./coordinates";
+/**
+ * Provides representation of DualShock4 controller by establishing connection to it through USB HID,
+ * parsing the data from it and emitting the changes to the observers
+ *
+ * @author Uros Spasojevic
+ */
 import {AnalogState} from "./analog-state";
+import {BehaviorSubject} from "rxjs";
+import {Coordinates} from "./coordinates";
+import {Device, devices, HID} from "node-hid";
+import {DualShockOptions} from "./dualshock-options";
+import {DualShockState} from "./dualshock-state";
+import {Logger, LogLevel} from '@uspasojevic/logger';
 import {OrientationState} from "./orientation-state";
 import {TouchPadState} from "./touch-pad-state";
 
 export class DualShock {
-    private options: DualShockOptions;
-    private logger: Logger = new Logger();
-    private hid: HID | null = null;
+    /**
+     * Options for DualShock
+     *
+     * @internal
+     * @private
+     */
+    private _options: DualShockOptions;
 
+    /**
+     * Logger reference
+     *
+     * @internal
+     * @private
+     */
+    private _logger: Logger = new Logger();
+
+    /**
+     * Node HID reference
+     *
+     * @internal
+     * @private
+     */
+    private _hid: HID | null = null;
+
+    /**
+     * DualShock state
+     */
     public readonly state: BehaviorSubject<Partial<DualShockState>> = new BehaviorSubject<Partial<DualShockState>>({});
 
-    constructor(options: DualShockOptions) {
+    /**
+     * Constructs DualShock object
+     *
+     * @param options - Configuration options
+     */
+    constructor(options?: DualShockOptions) {
+        if (!options) {
+            options = {};
+        }
+
         options.vendorID = options.vendorID || 0x054c;
         options.productID = options.productID || 0x09cc;
         options.tag = options.tag || 'DualShock';
 
-        this.options = options;
+        this._options = options;
     }
 
+    /**
+     * Finds device based on vendor ID and product ID
+     *
+     * @param device - Reference of device that is currently being checked
+     * @returns Returns true if vendor ID and product ID are matched
+     * @internal
+     * @private
+     */
     private _findDevice(device: Device): boolean {
-        return device.vendorId === this.options.vendorID! && device.productId === this.options.productID;
+        return device.vendorId === this._options.vendorID! && device.productId === this._options.productID;
     }
 
-    private static _getDPadUpState(dpad: number): boolean {
-        return dpad === 0 || dpad === 1 || dpad === 7;
+    /**
+     * Returns DPad Up state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
+    private static _getDPadUpState(state: number): boolean {
+        return state === 0 || state === 1 || state === 7;
     }
 
-    private static _getDPadDownState(dpad: number): boolean {
-        return dpad === 3 || dpad === 4 || dpad === 5;
+    /**
+     * Returns DPad Down state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
+    private static _getDPadDownState(state: number): boolean {
+        return state === 3 || state === 4 || state === 5;
     }
 
-    private static _getDPadLeftState(dpad: number): boolean {
-        return dpad === 5 || dpad === 6 || dpad === 7;
+    /**
+     * Returns DPad Left state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
+    private static _getDPadLeftState(state: number): boolean {
+        return state === 5 || state === 6 || state === 7;
     }
 
-    private static _getDPadRightState(dpad: number): boolean {
-        return dpad === 1 || dpad === 2 || dpad === 3;
+    /**
+     * Returns DPad Right state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
+    private static _getDPadRightState(state: number): boolean {
+        return state === 1 || state === 2 || state === 3;
     }
 
+    /**
+     * Returns Cross state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getCrossState(state: number): boolean {
         return (state & 32) !== 0;
     }
 
+    /**
+     * Returns Circle state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getCircleState(state: number): boolean {
         return (state & 64) !== 0;
     }
 
+    /**
+     * Returns Square state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getSquareState(state: number): boolean {
         return (state & 16) !== 0;
     }
 
+    /**
+     * Returns Triangle state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getTriangleState(state: number): boolean {
         return (state & 128) !== 0;
     }
 
+    /**
+     * Returns Left stick movement state
+     *
+     * @param state - Reference of state
+     * @returns Returns Left stick {@link Coordinates | coordinates}
+     * @internal
+     * @private
+     */
     private static _getLeftStickState(state: Buffer): Coordinates {
         return {
             x: state[1],
@@ -67,6 +185,14 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns Right stick movement state
+     *
+     * @param state - Reference of state
+     * @returns Returns Right stick {@link Coordinates | coordinates}
+     * @internal
+     * @private
+     */
     private static _getRightStickState(state: Buffer): Coordinates {
         return {
             x: state[3],
@@ -75,30 +201,86 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns R3 state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getR3State(state: number): boolean {
         return (state & 128) !== 0;
     }
 
+    /**
+     * Returns L3 state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getL3State(state: number): boolean {
         return (state & 64) !== 0;
     }
 
+    /**
+     * Returns Options state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getOptionsState(state: number): boolean {
         return (state & 32) !== 0;
     }
 
+    /**
+     * Returns Share state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getShareState(state: number): boolean {
         return (state & 16) !== 0;
     }
 
+    /**
+     * Returns L1 state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getL1State(state: number): boolean {
         return (state & 1) !== 0;
     }
 
+    /**
+     * Returns R1 state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getR1State(state: number): boolean {
         return (state & 2) !== 0;
     }
 
+    /**
+     * Returns R2 state
+     *
+     * @param state - Reference of state
+     * @returns Returns state of {@link AnalogState | R2 analog}
+     * @internal
+     * @private
+     */
     private static _getR2State(state: Buffer): AnalogState {
         return {
             pressed: (state[6] & 8) !== 0,
@@ -106,6 +288,14 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns L2 state
+     *
+     * @param state - Reference of state
+     * @returns Returns state of {@link AnalogState | L2 analog}
+     * @internal
+     * @private
+     */
     private static _getL2State(state: Buffer): AnalogState {
         return {
             pressed: (state[6] & 4) !== 0,
@@ -113,6 +303,14 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns Motion sensor state
+     *
+     * @param state - Reference of state
+     * @returns Returns {@link Coordinates | coordinates} of motion sensor
+     * @internal
+     * @private
+     */
     private static _getMotionState(state: Buffer): Coordinates {
         return {
             x: state.readInt16LE(13),
@@ -121,6 +319,14 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns Gyroscope sensor state
+     *
+     * @param state - Reference of state
+     * @returns Returns {@link OrientationState | orientation} of gyroscope sensor
+     * @internal
+     * @private
+     */
     private static _getOrientationState(state: Buffer): OrientationState {
         return {
             roll: -state.readInt16LE(19),
@@ -129,10 +335,26 @@ export class DualShock {
         };
     }
 
+    /**
+     * Returns internal controller timestamp
+     *
+     * @param state - Reference of state
+     * @returns Returns a number representing internal controller timestamp
+     * @internal
+     * @private
+     */
     private static _getTimestampState(state: number): number {
         return state >> 2;
     }
 
+    /**
+     * Returns TouchPad state
+     *
+     * @param state - Reference of state
+     * @returns Returns {@link TouchPadState | touchpad} state
+     * @internal
+     * @private
+     */
     private static _getTrackPadState(state: Buffer): TouchPadState {
         return {
             pressed: (state[7] & 2) !== 0,
@@ -159,68 +381,93 @@ export class DualShock {
         }
     }
 
+    /**
+     * Returns PS state
+     *
+     * @param state - Reference of state
+     * @returns Returns true if pressed, otherwise false
+     * @internal
+     * @private
+     */
     private static _getPsState(state: number): boolean {
         return (state & 1) !== 0;
     }
 
+    /**
+     * Parses HID data regarding connected controller and updates the controller {@link DualShockState | state}
+     *
+     * @param data - HID data
+     * @internal
+     * @private
+     */
     private _parseHIDData(data: Buffer): void {
         let state: DualShockState = {
-            leftStick: DualShock._getLeftStickState(data),
-            rightStick: DualShock._getRightStickState(data),
-            dPadUp: DualShock._getDPadUpState(data[5] & 15),
+            battery: data[12],
+            circle: DualShock._getCircleState(data[5]),
+            cross: DualShock._getCrossState(data[5]),
             dPadDown: DualShock._getDPadDownState(data[5] & 15),
             dPadLeft: DualShock._getDPadLeftState(data[5] & 15),
             dPadRight: DualShock._getDPadRightState(data[5] & 15),
-            cross: DualShock._getCrossState(data[5]),
-            circle: DualShock._getCircleState(data[5]),
-            square: DualShock._getSquareState(data[5]),
-            triangle: DualShock._getTriangleState(data[5]),
-            r3: DualShock._getR3State(data[6]),
-            l3: DualShock._getL3State(data[6]),
-            options: DualShock._getOptionsState(data[6]),
-            share: DualShock._getShareState(data[6]),
+            dPadUp: DualShock._getDPadUpState(data[5] & 15),
             l1: DualShock._getL1State(data[6]),
-            r1: DualShock._getR1State(data[6]),
             l2: DualShock._getL2State(data),
-            r2: DualShock._getR2State(data),
+            l3: DualShock._getL3State(data[6]),
+            leftStick: DualShock._getLeftStickState(data),
             motion: DualShock._getMotionState(data),
+            options: DualShock._getOptionsState(data[6]),
             orientation: DualShock._getOrientationState(data),
+            ps: DualShock._getPsState(data[7]),
+            r1: DualShock._getR1State(data[6]),
+            r2: DualShock._getR2State(data),
+            r3: DualShock._getR3State(data[6]),
+            rightStick: DualShock._getRightStickState(data),
+            share: DualShock._getShareState(data[6]),
+            square: DualShock._getSquareState(data[5]),
             timestamp: DualShock._getTimestampState(data[7]),
-            battery: data[12],
             touchPad: DualShock._getTrackPadState(data),
-            ps: DualShock._getPsState(data[7])
+            triangle: DualShock._getTriangleState(data[5])
         };
 
         this.state.next(state);
     }
 
-    private _handleHIDError(error: any): void {
-        this.hid!.close();
-        this.logger.log(
+    /**
+     * Handles HID error by disconnecting from controller (if applicable) and logging the error
+     *
+     * @internal
+     * @private
+     */
+    private _handleHIDError(): void {
+        this._hid!.close();
+        this._logger.log(
             LogLevel.ERROR,
-            this.options.tag!,
-            `Lost connection to ${this.options.vendorID}:${this.options.productID}`
+            this._options.tag!,
+            `Lost connection to ${this._options.vendorID}:${this._options.productID}`
         );
     }
 
+    /**
+     * Connects to the DualShock controller
+     * Subscribe to {@link DualShock.state | state} first
+     */
     public connect(): void {
-        this.logger.log(
+        this._logger.log(
             LogLevel.INFO,
-            this.options.tag!,
-            `Connecting to ${this.options.vendorID}:${this.options.productID}`
+            this._options.tag!,
+            `Connecting to ${this._options.vendorID}:${this._options.productID}`
         );
 
         const device = devices().find(this._findDevice.bind(this));
 
         if (device) {
-            this.hid = new HID(this.options.vendorID!, this.options.productID!);
-            this.hid!.on('data', this._parseHIDData.bind(this));
-            this.hid!.on('error', this._handleHIDError.bind(this));
+            this._hid = new HID(this._options.vendorID!, this._options.productID!);
+            this._hid!.on('data', this._parseHIDData.bind(this));
+            this._hid!.on('error', this._handleHIDError.bind(this));
         } else {
-            this.logger.log(
+            this._logger.log(
                 LogLevel.ERROR,
-                this.options.tag!,
-                `Failed to connect to ${this.options.vendorID!}:${this.options.productID!}`
+                this._options.tag!,
+                `Failed to connect to ${this._options.vendorID!}:${this._options.productID!}`
             );
         }
     }
