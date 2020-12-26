@@ -61,6 +61,10 @@ export class DualShock {
         this._options = options;
     }
 
+    private _sendDataToHID(data: any) {
+
+    }
+
     /**
      * Finds device based on vendor ID and product ID
      *
